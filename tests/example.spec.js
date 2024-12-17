@@ -1,19 +1,27 @@
 // @ts-check
-const { test, expect} = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('search and open image', async ({ page }) => {
+  // Acessa a página principal da Wikipédia
+  await page.goto('https://pt.wikipedia.org/wiki/Wikip%C3%A9dia:P%C3%A1gina_principal');
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+  // Localiza o campo de pesquisa pelo placeholder
+  const searchInput = page.getByPlaceholder('Pesquisar na Wikipédia');
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  // Clica no campo, insere o texto e pressiona Enter
+  await searchInput.click();
+  await searchInput.fill('rio grande do sul');
+  await Promise.all([
+    page.waitForNavigation(), // Aguarda o carregamento da nova página
+    searchInput.press('Enter')
+  ]);
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+  // Localiza a imagem da página de destino
+  const image = page.locator('img[width="133"][height="149"]'); // Seletor baseado nas dimensões conhecidas
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  // Aguarda a imagem ficar visível
+  await expect(image).toBeVisible({ timeout: 10000 });
+
+  // Clica na imagem
+  await image.click();
 });
